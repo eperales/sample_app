@@ -91,6 +91,15 @@ describe User do
         it {should_not be_valid}
     end
 
+    describe "email with mixed case" do
+        let(:mixed_case_email) { "Foo@ExaMPLe.com" }
+        it "sould be saved as all down case" do
+            @user.email = mixed_case_email
+            @user.save
+            @user.reload.email.should == mixed_case_email.downcase
+        end
+    end
+
 
     describe "when password does not match confirmation" do
         before { @user.password_confirmation = 'missmatch' }
