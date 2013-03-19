@@ -8,7 +8,7 @@ describe "User pages" do
 
         before {visit signup_path}
 
-        it { should have_selector( 'h1',     :text => 'Sign up' )           }
+        it { should have_title('Sign up' ) }
         it { should have_selector( 'title', :text => full_title('Sign up')) }
     end
 
@@ -16,7 +16,7 @@ describe "User pages" do
         let(:user) { FactoryGirl.create(:user) }
         before { visit user_path(user) }
 
-        it { should have_selector( 'h1',    :text => user.name ) }
+        it { should have_title( user.name ) }
         it { should have_selector( 'title', :text => user.name ) }
     end
 
@@ -38,42 +38,22 @@ describe "User pages" do
                 end
 
                 describe "without name" do
-                    before do
-                        fill_in "Email",        with: "user@example.com"
-                        fill_in "Password",     with: "foobar"
-                        fill_in "Confirmation", with: "foobar"
-                        click_button submit
-                    end
+                    before { signup_without_field('name') }
                     it { should have_content("Name can't be blank") }
                 end
 
                 describe "without email" do
-                    before do
-                        fill_in "Name",         with: "Example User"
-                        fill_in "Password",     with: "foobar"
-                        fill_in "Confirmation", with: "foobar"
-                        click_button submit
-                    end
+                    before { signup_without_field('email') }
                     it { should have_content("Email can't be blank") }
                 end
 
                 describe "without password" do
-                    before do
-                        fill_in "Name",         with: "Example User"
-                        fill_in "Email",        with: "user@example.com"
-                        fill_in "Confirmation", with: "foobar"
-                        click_button submit
-                    end
+                    before { signup_without_field('password') }
                     it { should have_content("Password can't be blank") }
                 end
 
                 describe "without confirmation" do
-                    before do
-                        fill_in "Name",         with: "Example User"
-                        fill_in "Email",        with: "user@example.com"
-                        fill_in "Password",     with: "foobar"
-                        click_button submit
-                    end
+                    before { signup_without_field('confirmation') }
                     it { should have_content("confirmation can't be blank") }
                 end
 
@@ -115,12 +95,7 @@ describe "User pages" do
         end
 
         describe "with valid information" do
-            before do
-                fill_in "Name",         with: "Example User"
-                fill_in "Email",        with: "user@example.com"
-                fill_in "Password",     with: "foobar"
-                fill_in "Confirmation", with: "foobar"
-            end
+            before { valid_signup() }
 
             it "should create a user" do
                 expect { click_button submit }.to change(User, :count).by(1)
@@ -131,7 +106,7 @@ describe "User pages" do
                 let(:user) { User.find_by_email('user@example.com') }
 
                 it { should have_selector('title', text: user.name) }
-                it { should have_selector('div.alert.alert-success', text: 'Welcome') }
+                it { should have_success_message('Welcome') }
                 it { should have_link('Sign out') }
             end
         end

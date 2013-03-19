@@ -20,3 +20,37 @@ RSpec::Matchers.define :have_error_message do |message|
     page.should have_selector('div.alert.alert-error', text: message)
   end
 end
+
+RSpec::Matchers.define :have_success_message do |message|
+  match do |page|
+    page.should have_selector('div.alert.alert-success', text: message)
+  end
+end
+
+def valid_signup()
+    fill_in "Name",         with: "Example User"
+    fill_in "Email",        with: "user@example.com"
+    fill_in "Password",     with: "foobar"
+    fill_in "Confirmation", with: "foobar"
+end
+
+RSpec::Matchers.define :have_title do |text|
+  match do |page|
+    page.should have_selector('h1', text: text)
+  end
+end
+
+def signup_without_field(field)
+    fields = {
+        name: 'Example User',
+        email: 'user@example.com',
+        password: 'foobar',
+        confirmation: 'foobar',
+    }
+
+    fields.each do |key, val|
+        fill_in key.to_s.capitalize, with: val unless key.to_s == field
+    end
+
+    click_button submit
+end
