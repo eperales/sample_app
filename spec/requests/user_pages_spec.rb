@@ -46,6 +46,12 @@ describe "User pages" do
                 it "should be able to delete another user" do
                     expect { click_link('delete') }.to change(User, :count).by(-1)
                 end
+
+
+                it "should not be able to delete himself" do
+                    expect { delete user_path(admin) }.to change(User, :count).by(0)
+                end
+
                 it { should_not have_link('delete', href: user_path(admin)) }
             end
         end
@@ -101,7 +107,7 @@ describe "User pages" do
                 end
 
                 describe "without confirmation" do
-                    before { signup_without_field('confirmation') }
+                    before { signup_without_field('confirm') }
                     it { should have_content("confirmation can't be blank") }
                 end
 
@@ -110,7 +116,7 @@ describe "User pages" do
                         fill_in "Name",         with: "Example User"
                         fill_in "Email",        with: "user@example.com"
                         fill_in "Password",     with: "foo"
-                        fill_in "Confirmation", with: "foo"
+                        fill_in "Confirm", with: "foo"
                         click_button submit
                     end
                     it { should have_content("Password is too short (minimum is 6 characters)") }
@@ -122,7 +128,7 @@ describe "User pages" do
                         fill_in "Name",         with: "Example User"
                         fill_in "Email",        with: "user@example.com"
                         fill_in "Password",     with: "foobar"
-                        fill_in "Confirmation", with: "barfoo"
+                        fill_in "Confirm", with: "barfoo"
                         click_button submit
                     end
                     it { should have_content("Password doesn't match confirmation") }
@@ -134,7 +140,7 @@ describe "User pages" do
                         fill_in "Name",         with: "Example User"
                         fill_in "Email",        with: user.email
                         fill_in "Password",     with: "foobar"
-                        fill_in "Confirmation", with: "foobar"
+                        fill_in "Confirm", with: "foobar"
                         click_button submit
                     end
                     it { should have_content("Email has already been taken") }
@@ -180,7 +186,7 @@ describe "User pages" do
             it { should have_content('error') }
         end
 
-        describe "witch valid information" do
+        describe "with valid information" do
             let(:new_name) {'New Name'}
             let(:new_email) {'new@example.com'}
             before do
