@@ -35,16 +35,106 @@ describe "Static pages" do
 
         describe "for signed-in users" do
             let(:user) { FactoryGirl.create(:user) }
-            before do
-                FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum")
-                FactoryGirl.create(:micropost, user: user, content: "Dolor sit amet")
-                valid_signin user
-                visit root_path
+
+            describe "with no microposts" do
+                before do
+                    valid_signin user
+                    visit root_path
+                end
+
+                describe "should show string '0 microposts'" do
+                    it {should have_content("#{user.microposts.count} microposts")}
+                end
             end
 
-            it "should render the user's feed" do
-                user.feed.each do |item|
-                    page.should have_selector("li##{item.id}", text: item.content) 
+            describe "with 1 micropost" do
+                before do
+                    FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum")
+                    valid_signin user
+                    visit root_path
+                end
+                describe "should show string '1 micropost'" do
+                    it {should have_content("#{user.microposts.count} micropost")}
+                    it {should_not have_content("#{user.microposts.count} microposts")}
+                end
+            end
+
+            describe "with more than 1 micropost" do
+                before do
+                    FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum")
+                    FactoryGirl.create(:micropost, user: user, content: "Dolor sit amet")
+                    valid_signin user
+                    visit root_path
+                end
+                describe "should show string '2 microposts'" do
+                    it {should have_content("#{user.microposts.count} microposts")}
+                end
+            end
+
+
+            describe "no matter how many microposts the user have" do
+                
+                before do
+                    FactoryGirl.create(:micropost, user: user, content: "Lorem ipsum")
+                    FactoryGirl.create(:micropost, user: user, content: "Dolor sit amet")
+                    valid_signin user
+                    visit root_path
+                end
+                
+                it "should render the user's feed" do
+                    user.feed.each do |item|
+                        page.should have_selector("li##{item.id}", text: item.content) 
+                    end
+                end
+
+                it "should show the microposts count" do
+                    page.should have_content("#{user.microposts.count} microp")
+                end
+            end
+
+            describe "pagination" do
+
+                before do
+                    valid_signin user
+                    visit root_path
+                end
+
+                describe "with less than 30 items" do
+                    it "should not have paginator" do
+                        page.should_not have_selector('li.next.next_page')
+                    end
+                end
+
+                describe "with more than 30 items" do
+                    before do
+                        31.times do
+                            FactoryGirl.create(:micropost, user: user)
+                        end
+                        visit root_path
+                    end
+                    
+                    it "should have paginator" do
+                        page.should have_selector('li.next.next_page')
+                    end
+
+                    describe "item 32" do
+                        before do
+                            FactoryGirl.create(:micropost, user: user, content: "Post numero 32. Nomes h'ha de mostrar a la segona pagina", created_at: 1.year.ago)
+                            visit root_path
+                        end
+
+                        it "does not apear in first page" do
+                            page.should_not have_content("Post numero 32. Nomes h'ha de mostrar a la segona pagina")
+                        end
+
+                        describe "must apear in second page" do
+                            before do
+                                click_link('Next')
+                            end
+
+                            it { should have_content("Post numero 32. Nomes h'ha de mostrar a la segona pagina") }
+                        end
+                    end
                 end
             end
         end

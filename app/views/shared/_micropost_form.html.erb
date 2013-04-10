@@ -1,7 +1,29 @@
+<script>
+
+    function textCounter(textarea, countdown, maxlimit)
+    {
+        textareaid = document.getElementById(textarea);
+        if (textareaid.value.length > maxlimit)
+            textareaid.value = textareaid.value.substring(0, maxlimit);
+        else
+            document.getElementById(countdown).value = '('+(maxlimit-textareaid.value.length)+' characters available)';
+    }
+
+</script>
+
 <%= form_for(@micropost) do |f| %>
     <%= render 'shared/error_messages', object: f.object %>
     <div class="field">
-        <%= f.text_area :content, placeholder: "Compose new micropost...", :cols => "5"%>
+        <%= f.text_area :content, placeholder: "Compose new micropost...", 
+                                  cols:        "5",  
+                                  onKeyDown:   "textCounter('micropost_content','ta1count',140);", 
+                                  onKeyUp:     "textCounter('micropost_content','ta1count',140);" 
+        %>
+        <input id="ta1count" readonly type="text" size="30"/>
     </div>
     <%= f.submit "Post", class: "btn btn-large btn-primary" %>
 <% end %>
+
+<script type="text/javascript">
+    textCounter('micropost_content','ta1count',140);
+</script>
